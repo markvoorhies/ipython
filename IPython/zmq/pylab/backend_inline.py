@@ -7,6 +7,7 @@ from __future__ import print_function
 
 # Standard library imports
 from cStringIO import StringIO
+from base64 import b64encode
 
 # System library imports.
 import matplotlib
@@ -137,7 +138,6 @@ def png_from_canvas(canvas):
     # (probably because we're violating some part of the ZMQ protocol).
     # For the moment, we work around this by sending a base64 encoded
     # payload.
-    from base64 import b64encode
     return b64encode(string_io.getvalue())
 
 def draw_if_interactive():

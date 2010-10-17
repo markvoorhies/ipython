@@ -1,5 +1,7 @@
 # System library imports
+import re
 from PyQt4 import QtCore, QtGui
+from base64 import b64decode
 
 # Local imports
 from IPython.frontend.qt.svg import save_svg, svg_to_clipboard, svg_to_image
@@ -82,7 +84,6 @@ class RichIPythonWidget(IPythonWidget):
                 try:
                     svg = item['data']['svg']
                     png = item['data']['png']
-                    from base64 import b64decode
                     image = QtGui.QImage.fromData(b64decode(png),format='PNG')
                 except ValueError:
                     self._append_plain_text('Received invalid plot data.')
@@ -184,7 +185,6 @@ class RichIPythonWidget(IPythonWidget):
                 buffer_.open(QtCore.QIODevice.WriteOnly)
                 image.save(buffer_, "PNG")
                 buffer_.close()
-                import re
                 return '<img src="data:image/png;base64,\n%s\n" />' % (
                     re.sub(r'(.{60})',r'\1\n',str(ba.toBase64())))
 
