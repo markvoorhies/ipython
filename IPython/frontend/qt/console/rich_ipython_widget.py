@@ -89,6 +89,7 @@ class RichIPythonWidget(IPythonWidget):
                 else:
                     format = self._add_image(image)
                     self._name_to_svg[str(format.name())] = svg
+                    format.setProperty(self._svg_text_format_property, svg)
                     cursor = self._get_end_cursor()
                     cursor.insertBlock()
                     cursor.insertImage(format)
