@@ -131,7 +131,7 @@ def png_from_canvas(canvas):
     """ Return a string containing the PNG representation of a FigureCanvasSvg.
     """
     string_io = StringIO()
-    canvas.print_figure(string_io, format='png')
+    canvas.print_figure(string_io, format='png', dpi = 70)
     # The PNG data uses all 8 bits.  Sending data with non-zero 8th bit
     # causes ipkernel.py::reply_socket.send_json(repy_msg) to hang
     # (probably because we're violating some part of the ZMQ protocol).
