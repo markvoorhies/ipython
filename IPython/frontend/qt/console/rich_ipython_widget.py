@@ -78,6 +78,22 @@ class RichIPythonWidget(IPythonWidget):
                     cursor.insertImage(format)
                     cursor.insertBlock()
                 return True
+            elif item['format'] == 'multi':
+                try:
+                    svg = item['data']['svg']
+                    png = item['data']['png']
+                    from base64 import b64decode
+                    image = QtGui.QImage.fromData(b64decode(png),format='PNG')
+                except ValueError:
+                    self._append_plain_text('Received invalid plot data.')
+                else:
+                    format = self._add_image(image)
+                    self._name_to_svg[str(format.name())] = svg
+                    cursor = self._get_end_cursor()
+                    cursor.insertBlock()
+                    cursor.insertImage(format)
+                    cursor.insertBlock()
+                return True
             else:
                 # Add other plot formats here!
                 return False

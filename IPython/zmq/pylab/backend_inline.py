@@ -21,16 +21,17 @@ from backend_payload import add_plot_payload
 #-----------------------------------------------------------------------------
 
 def show(close=True):
-    """Show all figures as SVG payloads sent to the IPython clients.
+    """Show all figures as multi-format payloads sent to the IPython clients.
 
     Parameters
     ----------
     close : bool, optional
       If true, a ``plt.close('all')`` call is automatically issued after
-      sending all the SVG figures.
+      sending all the multi-format figures.
     """
     for figure_manager in Gcf.get_all_fig_managers():
-        send_svg_canvas(figure_manager.canvas)
+        send_multi_canvas(figure_manager.canvas, (('png', png_from_canvas),
+                                                  (('svg', svg_from_canvas))))
     if close:
         matplotlib.pyplot.close('all')
 
@@ -72,8 +73,36 @@ def pastefig(*figs):
             if canvas is None:
                 print('Warning: figure %s not available.' % fig)
             else:
-                send_svg_canvas(canvas)
+                send_multi_canvas(canvas, (('svg', svg_from_canvas),
+                                           ('png', png_from_canvas)))
 
+def send_multi_canvas(canvas, formats):
+    """Draw the current canvas and send it in the specified formats.
+
+    Parameters
+    ----------
+    canvas : FigureCanvas
+      Canvas supporting rendering to the requested formats.  For correct
+      clipping, canvas should be one of the Matplotlib AGG backends.
+    formats : iterable of (string,f(canvas))
+      Where string is an iPython format string to be sent with the payload
+        (e.g. 'png','svg',...)
+      and f(canvas) is a function for making the appropriate request to
+        the canvas.
+    """
+    # Set the background to white instead so it looks good on black.  We store
+    # the current values to restore them at the end.
+    fc = canvas.figure.get_facecolor()
+    ec = canvas.figure.get_edgecolor()
+    canvas.figure.set_facecolor('white')
+    canvas.figure.set_edgecolor('white')
+    try:
+        imagestrings = dict((format, format_from_canvas(canvas))
+                            for (format, format_from_canvas) in formats)
+        add_plot_payload("multi",imagestrings)
+    finally:
+        canvas.figure.set_facecolor(fc)
+        canvas.figure.set_edgecolor(ec)
 
 def send_svg_canvas(canvas):
     """Draw the current canvas and send it as an SVG payload.
@@ -98,6 +127,18 @@ def svg_from_canvas(canvas):
     canvas.print_figure(string_io, format='svg')
     return string_io.getvalue()
 
+def png_from_canvas(canvas):
+    """ Return a string containing the PNG representation of a FigureCanvasSvg.
+    """
+    string_io = StringIO()
+    canvas.print_figure(string_io, format='png')
+    # The PNG data uses all 8 bits.  Sending data with non-zero 8th bit
+    # causes ipkernel.py::reply_socket.send_json(repy_msg) to hang
+    # (probably because we're violating some part of the ZMQ protocol).
+    # For the moment, we work around this by sending a base64 encoded
+    # payload.
+    from base64 import b64encode
+    return b64encode(string_io.getvalue())
 
 def draw_if_interactive():
     """
