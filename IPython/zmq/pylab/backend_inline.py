@@ -91,48 +91,30 @@ def send_multi_canvas(canvas, formats):
       and f(canvas) is a function for making the appropriate request to
         the canvas.
     """
-    # Set the background to white instead so it looks good on black.  We store
-    # the current values to restore them at the end.
-    fc = canvas.figure.get_facecolor()
-    ec = canvas.figure.get_edgecolor()
-    canvas.figure.set_facecolor('white')
-    canvas.figure.set_edgecolor('white')
-    try:
-        imagestrings = dict((format, format_from_canvas(canvas))
-                            for (format, format_from_canvas) in formats)
-        add_plot_payload("multi",imagestrings)
-    finally:
-        canvas.figure.set_facecolor(fc)
-        canvas.figure.set_edgecolor(ec)
+    imagestrings = dict((format, format_from_canvas(canvas))
+                        for (format, format_from_canvas) in formats)
+    add_plot_payload("multi",imagestrings)
 
 def send_svg_canvas(canvas):
     """Draw the current canvas and send it as an SVG payload.
     """
-    # Set the background to white instead so it looks good on black.  We store
-    # the current values to restore them at the end.
-    fc = canvas.figure.get_facecolor()
-    ec = canvas.figure.get_edgecolor()
-    canvas.figure.set_facecolor('white')
-    canvas.figure.set_edgecolor('white')
-    try:
-        add_plot_payload('svg', svg_from_canvas(canvas))
-    finally:
-        canvas.figure.set_facecolor(fc)
-        canvas.figure.set_edgecolor(ec)
+    add_plot_payload('svg', svg_from_canvas(canvas))
 
 
 def svg_from_canvas(canvas):
     """ Return a string containing the SVG representation of a FigureCanvasSvg.
     """
     string_io = StringIO()
-    canvas.print_figure(string_io, format='svg')
+    canvas.print_figure(string_io, format='svg',
+                        facecolor='white', edgecolor='white')
     return string_io.getvalue()
 
 def png_from_canvas(canvas):
     """ Return a string containing the PNG representation of a FigureCanvasSvg.
     """
     string_io = StringIO()
-    canvas.print_figure(string_io, format='png', dpi = 70)
+    canvas.print_figure(string_io, format='png', dpi = 70,
+                        facecolor='white', edgecolor='white')
     # The PNG data uses all 8 bits.  Sending data with non-zero 8th bit
     # causes ipkernel.py::reply_socket.send_json(repy_msg) to hang
     # (probably because we're violating some part of the ZMQ protocol).
