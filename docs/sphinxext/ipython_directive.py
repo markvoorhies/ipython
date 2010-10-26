@@ -25,7 +25,6 @@ prompts ``Yade [1]:`` and ``-> [1]:``::
    prompt_in2="     .\D..",
    prompt_out=" ->  [\#]:"
  )
- id.reconfig_shell()
 
  import ipython_console_highlighting as ich
  ich.IPythonConsoleLexer.input_prompt=
@@ -214,7 +213,7 @@ class EmbeddedSphinxShell(object):
             argv, self.user_ns, self.user_glocal_ns, embedded=True,
             #shell_class=IPython.Shell.InteractiveShell,
             shell_class=MatplotlibShell,
-            rc_override = dict(colors = 'NoColor', **rc_override))
+            rc_override = dict(colors = 'NoColor'), **rc_override)
 
         self.input = ''
         self.output = ''
@@ -402,13 +401,6 @@ class EmbeddedSphinxShell(object):
 # A global instance used below. XXX: not sure why this can't be created inside
 # ipython_directive itself.
 shell = EmbeddedSphinxShell()
-
-def reconfig_shell():
-    """Called after setting module-level variables to re-instantiate
-    with the set values (since shell is instantiated first at import-time
-    when module variables have default values)"""
-    global shell
-    shell = EmbeddedSphinxShell()
 
 
 def ipython_directive(name, arguments, options, content, lineno,
