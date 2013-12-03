@@ -9,9 +9,9 @@ Magic command interface for diffing cells
 Usage
 =====
 
-``%%diff``
+``%diff cell1 cell2``
 
-{DIFF_DOC}
+Render line-based diff of cell1 and cell2.
 
 """
 
